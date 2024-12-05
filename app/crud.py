@@ -1,19 +1,17 @@
 from sqlalchemy.orm import Session
-from .models import User, Work, Avatar, Room
+from app import models
 
-def create_user(db: Session, login: str, password: str):
-    db_user = User(Login=login, PasswordHash=password)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+def get_users(db: Session, skip: int = 0, limit: int = 10):
+    return db.query(models.User).order_by(models.User.UserID).offset(skip).limit(limit).all()
 
-def get_user_by_login(db: Session, login: str):
-    return db.query(User).filter(User.Login == login).first()
+def get_works(db: Session, skip: int = 0, limit: int = 10):
+    return db.query(models.Work).offset(skip).limit(limit).all()
 
-def create_work(db: Session, user_id: int, work_type: str, content: bytes):
-    db_work = Work(UserID=user_id, WorkType=work_type, WorkContent=content)
-    db.add(db_work)
-    db.commit()
-    db.refresh(db_work)
-    return db_work
+def get_avatars(db: Session, skip: int = 0, limit: int = 10):
+    return db.query(models.Avatar).offset(skip).limit(limit).all()
+
+def get_rooms(db: Session, skip: int = 0, limit: int = 10):
+    return db.query(models.Room).offset(skip).limit(limit).all()
+
+def get_user_by_username(db: Session, Login: str):
+    return db.query(models.User).filter(models.User.Login == Login).first()
