@@ -1,70 +1,146 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, LargeBinary, JSON
-from sqlalchemy.orm import relationship, declarative_base
+from datetime import datetime
+
+from sqlalchemy import (
+    Table,
+    Column,
+    Integer,
+    String,
+    DateTime,
+    ForeignKey,
+    Text, LargeBinary
+)
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+from app.database import engine
 from sqlalchemy.sql import func
 
-# Базовый класс для определения моделей
 Base = declarative_base()
 
+
 class User(Base):
-    __tablename__ = 'Users'
+    __tablename__ = "Users"
+    __table_args__ = {"autoload_with": engine}
 
-    UserID = Column(Integer, primary_key=True, autoincrement=True)  # Уникальный идентификатор игрока
-    Login = Column(String(50), unique=True, nullable=False)        # Логин игрока
-    PasswordHash = Column(String(255), nullable=False)              # Хэшированный пароль
-    DateCreated = Column(DateTime, server_default=func.now())       # Дата создания профиля
+    UserID = Column(Integer, primary_key=True)
+    Login = Column(String(50))
+    Nickname = Column(String(50))
+    PasswordHash = Column(String(255))
+    DateCreated = Column(DateTime, server_default=func.now())
 
-    # Связь с работами
     works = relationship("Work", back_populates="user")
+    avatar = relationship("Avatar", uselist=False, back_populates="user")
+    rooms = relationship("Room", back_populates="user")
 
-    # Связь с аватаром
-    avatar = relationship("Avatar", back_populates="user", uselist=False)
 
-    # Связь с комнатой
-    room = relationship("Room", back_populates="user", uselist=False)
 
 class Work(Base):
-    __tablename__ = 'Works'
+    __tablename__ = "Works"
+    __table_args__ = {"autoload_with": engine}
 
-    WorkID = Column(Integer, primary_key=True, autoincrement=True)  # Уникальный идентификатор работы
-    UserID = Column(Integer, ForeignKey('Users.UserID', ondelete='CASCADE'), nullable=False)  # Ссылка на пользователя
-    WorkType = Column(String(50), nullable=False)                    # Тип работы
-    WorkContent = Column(LargeBinary, nullable=False)                # Содержимое работы в виде бинарных данных
-    DateAdded = Column(DateTime, server_default=func.now())         # Дата добавления работы
-    LikesCount = Column(Integer, default=0)                          # Количество лайков
+    WorkID = Column(Integer, primary_key=True, index=True)
+    UserID = Column(Integer, ForeignKey("Users.UserID"), nullable=False)
+    WorkType = Column(String, nullable=False)
+    WorkContent = Column(LargeBinary, nullable=False)
+    DateAdded = Column(DateTime, default=datetime.utcnow)
+    LikesCount = Column(Integer, default=0)
 
-    # Связь с пользователем
     user = relationship("User", back_populates="works")
+    rooms = relationship(
+        "Room",
+        primaryjoin="or_(Room.Slot1WorkID == Work.WorkID, "
+                    "Room.Slot2WorkID == Work.WorkID, "
+                    "Room.Slot3WorkID == Work.WorkID, "
+                    "Room.Slot4WorkID == Work.WorkID, "
+                    "Room.Slot5WorkID == Work.WorkID, "
+                    "Room.Slot6WorkID == Work.WorkID, "
+                    "Room.Slot7WorkID == Work.WorkID, "
+                    "Room.Slot8WorkID == Work.WorkID, "
+                    "Room.Slot9WorkID == Work.WorkID, "
+                    "Room.Slot10WorkID == Work.WorkID)",
+    )
+
 
 class Avatar(Base):
-    __tablename__ = 'Avatars'
+    __tablename__ = "Avatars"
+    __table_args__ = {"autoload_with": engine}
 
-    AvatarID = Column(Integer, primary_key=True, autoincrement=True)  # Уникальный идентификатор аватара
-    UserID = Column(Integer, ForeignKey('Users.UserID', ondelete='CASCADE'), nullable=False)  # Ссылка на пользователя
-    EyeColor = Column(Integer, default=0)                            # Цвет глаз
-    HairStyle = Column(Integer, default=0)                           # Стиль волос
-    SkinColor = Column(Integer, default=0)                           # Цвет кожи
-    Outfit = Column(Integer, default=0)                              # Тип одежды
-    OtherAttributes = Column(JSON, default=None)                     # Дополнительные параметры в формате JSON
+    AvatarID = Column(Integer, primary_key=True)
+    UserID = Column(Integer, ForeignKey("Users.UserID"))
+    EyeColor = Column(Integer)
+    HairStyle = Column(Integer)
+    SkinColor = Column(Integer)
+    Outfit = Column(Integer)
 
-    # Связь с пользователем
     user = relationship("User", back_populates="avatar")
 
+
 class Room(Base):
-    __tablename__ = 'Rooms'
+    __tablename__ = "Rooms"
+    __table_args__ = {"autoload_with": engine}
 
-    RoomID = Column(Integer, primary_key=True, autoincrement=True)  # Уникальный идентификатор комнаты
-    UserID = Column(Integer, ForeignKey('Users.UserID', ondelete='CASCADE'), nullable=False)  # Ссылка на пользователя
-    Slot1WorkID = Column(Integer, ForeignKey('Works.WorkID', ondelete='SET NULL'), default=None)  # ID работы в первом слоте
-    Slot2WorkID = Column(Integer, ForeignKey('Works.WorkID', ondelete='SET NULL'), default=None)  # ID работы во втором слоте
-    Slot3WorkID = Column(Integer, ForeignKey('Works.WorkID', ondelete='SET NULL'), default=None)  # ID работы в третьем слоте
-    Slot4WorkID = Column(Integer, ForeignKey('Works.WorkID', ondelete='SET NULL'), default=None)  # ID работы в четвертом слоте
-    Slot5WorkID = Column(Integer, ForeignKey('Works.WorkID', ondelete='SET NULL'), default=None)  # ID работы в пятом слоте
-    Slot6WorkID = Column(Integer, ForeignKey('Works.WorkID', ondelete='SET NULL'), default=None)  # ID работы в шестом слоте
-    Slot7WorkID = Column(Integer, ForeignKey('Works.WorkID', ondelete='SET NULL'), default=None)  # ID работы в седьмом слоте
-    Slot8WorkID = Column(Integer, ForeignKey('Works.WorkID', ondelete='SET NULL'), default=None)  # ID работы в восьмом слоте
-    Slot9WorkID = Column(Integer, ForeignKey('Works.WorkID', ondelete='SET NULL'), default=None)  # ID работы в девятом слоте
-    Slot10WorkID = Column(Integer, ForeignKey('Works.WorkID', ondelete='SET NULL'), default=None) # ID работы в десятом слоте
-    RoomSettings = Column(JSON, default=None)  # Настройки комнаты (цвет, текстуры и т.д.)
+    RoomID = Column(Integer, primary_key=True)
+    UserID = Column(Integer, ForeignKey("Users.UserID"))
+    Slot1WorkID = Column(Integer, ForeignKey("Works.WorkID"))
+    Slot2WorkID = Column(Integer, ForeignKey("Works.WorkID"))
+    Slot3WorkID = Column(Integer, ForeignKey("Works.WorkID"))
+    Slot4WorkID = Column(Integer, ForeignKey("Works.WorkID"))
+    Slot5WorkID = Column(Integer, ForeignKey("Works.WorkID"))
+    Slot6WorkID = Column(Integer, ForeignKey("Works.WorkID"))
+    Slot7WorkID = Column(Integer, ForeignKey("Works.WorkID"))
+    Slot8WorkID = Column(Integer, ForeignKey("Works.WorkID"))
+    Slot9WorkID = Column(Integer, ForeignKey("Works.WorkID"))
+    Slot10WorkID = Column(Integer, ForeignKey("Works.WorkID"))
 
-    # Связь с пользователем
-    user = relationship("User", back_populates="room")
+    user = relationship("User", back_populates="rooms")
+
+    slot1_work = relationship(
+        "Work",
+        foreign_keys=[Slot1WorkID],
+        back_populates="rooms",
+        lazy="joined"
+    )
+    slot2_work = relationship(
+        "Work",
+        foreign_keys=[Slot2WorkID],
+        lazy="joined"
+    )
+    slot3_work = relationship(
+        "Work",
+        foreign_keys=[Slot3WorkID],
+        lazy="joined"
+    )
+    slot4_work = relationship(
+        "Work",
+        foreign_keys=[Slot4WorkID],
+        lazy="joined"
+    )
+    slot5_work = relationship(
+        "Work",
+        foreign_keys=[Slot5WorkID],
+        lazy="joined"
+    )
+    slot6_work = relationship(
+        "Work",
+        foreign_keys=[Slot6WorkID],
+        lazy="joined"
+    )
+    slot7_work = relationship(
+        "Work",
+        foreign_keys=[Slot7WorkID],
+        lazy="joined"
+    )
+    slot8_work = relationship(
+        "Work",
+        foreign_keys=[Slot8WorkID],
+        lazy="joined"
+    )
+    slot9_work = relationship(
+        "Work",
+        foreign_keys=[Slot9WorkID],
+        lazy="joined"
+    )
+    slot10_work = relationship(
+        "Work",
+        foreign_keys=[Slot10WorkID],
+        lazy="joined"
+    )

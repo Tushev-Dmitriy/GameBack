@@ -1,57 +1,85 @@
 from pydantic import BaseModel
-from typing import Optional, List, Dict
-
-class User(BaseModel):
-    UserID: int
-    Login: str
-    DateCreated: str
-
-    class Config:
-        from_attributes = True
+from datetime import datetime
+from typing import Optional, List
 
 class UserLoginResponse(BaseModel):
+    UserID: int
     Login: str
+    Nickname: str
 
     class Config:
         from_attributes = True
 
-class Work(BaseModel):
+class UserRegistration(BaseModel):
+    Login: str
+    Nickname: str
+    PasswordHash: str
+
+    class Config:
+        from_attributes = True
+
+
+class UserLoginRequest(BaseModel):
+    Login: str
+    Password: str
+
+    class Config:
+        from_attributes = True
+
+class WorkCreate(BaseModel):
+    WorkType: str
+    WorkContent: bytes
+    LikesCount: int = 0
+
+class WorkSchema(BaseModel):
     WorkID: int
     UserID: int
     WorkType: str
-    WorkContent: str
-    DateAdded: str
+    DateAdded: datetime
     LikesCount: int
 
     class Config:
         from_attributes = True
 
-class Avatar(BaseModel):
+
+class AvatarSchema(BaseModel):
     AvatarID: int
-    UserID: int
     EyeColor: int
     HairStyle: int
-    SkinColor: int
     Outfit: int
-    OtherAttributes: Optional[Dict[str, str]]
 
     class Config:
         from_attributes = True
 
-class Room(BaseModel):
-    RoomID: int
+class AvatarCreate(BaseModel):
+    EyeColor: int
+    HairStyle: int
+    SkinColor: int
+    Outfit: int
+
+class UserSchema(BaseModel):
     UserID: int
-    Slot1WorkID: Optional[int]
-    Slot2WorkID: Optional[int]
-    Slot3WorkID: Optional[int]
-    Slot4WorkID: Optional[int]
-    Slot5WorkID: Optional[int]
-    Slot6WorkID: Optional[int]
-    Slot7WorkID: Optional[int]
-    Slot8WorkID: Optional[int]
-    Slot9WorkID: Optional[int]
-    Slot10WorkID: Optional[int]
-    RoomSettings: Optional[Dict[str, str]]
+    Login: str
+    DateCreated: datetime
+    works: Optional[List[WorkSchema]] = []
+    avatar: Optional[AvatarSchema] = None
+
+    class Config:
+        from_attributes = True
+
+class RoomSchema(BaseModel):
+    RoomID: int
+    Slot1WorkID: Optional[int] = None
+    Slot2WorkID: Optional[int] = None
+    Slot3WorkID: Optional[int] = None
+    Slot4WorkID: Optional[int] = None
+    Slot5WorkID: Optional[int] = None
+    Slot6WorkID: Optional[int] = None
+    Slot7WorkID: Optional[int] = None
+    Slot8WorkID: Optional[int] = None
+    Slot9WorkID: Optional[int] = None
+    Slot10WorkID: Optional[int] = None
+    RoomSettings: Optional[dict] = None
 
     class Config:
         from_attributes = True
