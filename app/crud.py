@@ -1,6 +1,5 @@
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 from app import models, schemas
-
 
 def get_users(db: Session, skip: int = 0, limit: int = 10):
     return db.query(models.User).order_by(models.User.UserID).offset(skip).limit(limit).all()
@@ -37,9 +36,6 @@ def create_work(db: Session, user_id: int, work_data: schemas.WorkCreate):
     db.commit()
     db.refresh(new_work)
     return new_work
-
-from sqlalchemy.orm import Session
-from app import models, schemas
 
 def save_avatar(db: Session, user_id: int, avatar_data: schemas.AvatarCreate):
     avatar = db.query(models.Avatar).filter(models.Avatar.UserID == user_id).first()
