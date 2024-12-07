@@ -7,7 +7,9 @@ from sqlalchemy import (
     String,
     DateTime,
     ForeignKey,
-    Text, LargeBinary
+    Text,
+    LargeBinary,
+    Boolean
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -40,9 +42,11 @@ class Work(Base):
     WorkID = Column(Integer, primary_key=True, index=True)
     UserID = Column(Integer, ForeignKey("Users.UserID"), nullable=False)
     WorkType = Column(String, nullable=False)
+    WorkTitle = Column(String, nullable=True)
     WorkContent = Column(LargeBinary, nullable=False)
     DateAdded = Column(DateTime, default=datetime.utcnow)
     LikesCount = Column(Integer, default=0)
+    IsModerated = Column(Boolean, default=False)
 
     user = relationship("User", back_populates="works")
     rooms = relationship(
@@ -97,50 +101,60 @@ class Room(Base):
         "Work",
         foreign_keys=[Slot1WorkID],
         back_populates="rooms",
-        lazy="joined"
+        lazy="joined",
+        overlaps="rooms"
     )
     slot2_work = relationship(
         "Work",
         foreign_keys=[Slot2WorkID],
-        lazy="joined"
+        lazy="joined",
+        overlaps="rooms"
     )
     slot3_work = relationship(
         "Work",
         foreign_keys=[Slot3WorkID],
-        lazy="joined"
+        lazy="joined",
+        overlaps="rooms"
     )
     slot4_work = relationship(
         "Work",
         foreign_keys=[Slot4WorkID],
-        lazy="joined"
+        lazy="joined",
+        overlaps="rooms"
     )
     slot5_work = relationship(
         "Work",
         foreign_keys=[Slot5WorkID],
-        lazy="joined"
+        lazy="joined",
+        overlaps="rooms"
     )
     slot6_work = relationship(
         "Work",
         foreign_keys=[Slot6WorkID],
-        lazy="joined"
+        lazy="joined",
+        overlaps="rooms"
     )
     slot7_work = relationship(
         "Work",
         foreign_keys=[Slot7WorkID],
-        lazy="joined"
+        lazy="joined",
+        overlaps="rooms"
     )
     slot8_work = relationship(
         "Work",
         foreign_keys=[Slot8WorkID],
-        lazy="joined"
+        lazy="joined",
+        overlaps="rooms"
     )
     slot9_work = relationship(
         "Work",
         foreign_keys=[Slot9WorkID],
-        lazy="joined"
+        lazy="joined",
+        overlaps="rooms"
     )
     slot10_work = relationship(
         "Work",
         foreign_keys=[Slot10WorkID],
-        lazy="joined"
+        lazy="joined",
+        overlaps="rooms"
     )

@@ -29,6 +29,7 @@ def create_work(db: Session, user_id: int, work_data: schemas.WorkCreate):
     new_work = models.Work(
         UserID=user_id,
         WorkType=work_data.WorkType,
+        WorkTitle=work_data.WorkTitle,
         WorkContent=work_data.WorkContent,
         LikesCount=work_data.LikesCount or 0,
     )

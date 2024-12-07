@@ -28,6 +28,7 @@ class UserLoginRequest(BaseModel):
 
 class WorkCreate(BaseModel):
     WorkType: str
+    WorkTitle: str
     WorkContent: bytes
     LikesCount: int = 0
 
@@ -37,7 +38,7 @@ class WorkSchema(BaseModel):
     WorkType: str
     DateAdded: datetime
     LikesCount: int
-
+    IsModerated: bool
     class Config:
         from_attributes = True
 
@@ -46,6 +47,7 @@ class AvatarSchema(BaseModel):
     AvatarID: int
     EyeColor: int
     HairStyle: int
+    SkinColor: int
     Outfit: int
 
     class Config:
@@ -69,17 +71,24 @@ class UserSchema(BaseModel):
 
 class RoomSchema(BaseModel):
     RoomID: int
-    Slot1WorkID: Optional[int] = None
-    Slot2WorkID: Optional[int] = None
-    Slot3WorkID: Optional[int] = None
-    Slot4WorkID: Optional[int] = None
-    Slot5WorkID: Optional[int] = None
-    Slot6WorkID: Optional[int] = None
-    Slot7WorkID: Optional[int] = None
-    Slot8WorkID: Optional[int] = None
-    Slot9WorkID: Optional[int] = None
-    Slot10WorkID: Optional[int] = None
-    RoomSettings: Optional[dict] = None
+    Slot1WorkID: Optional[int]
+    Slot2WorkID: Optional[int]
+    Slot3WorkID: Optional[int]
+    Slot4WorkID: Optional[int]
+    Slot5WorkID: Optional[int]
+    Slot6WorkID: Optional[int]
+    Slot7WorkID: Optional[int]
+    Slot8WorkID: Optional[int]
+    Slot9WorkID: Optional[int]
+    Slot10WorkID: Optional[int]
 
     class Config:
         from_attributes = True
+
+class RoomWorksResponse(BaseModel):
+    RoomID: int
+    Works: List[WorkSchema]
+
+class AddWorkRequest(BaseModel):
+    work_id: int
+    user_id: int
