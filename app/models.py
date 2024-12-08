@@ -63,6 +63,8 @@ class Work(Base):
                     "Room.Slot10WorkID == Work.WorkID)",
     )
 
+    def get_work_content_as_string(self):
+        return self.WorkContent.decode('utf-8')
 
 class Avatar(Base):
     __tablename__ = "Avatars"

@@ -63,6 +63,6 @@ def login_user(user_data: schemas.UserLoginRequest, db: Session = Depends(get_db
             db.add(new_room)
             db.commit()
 
-        return schemas.UserLoginResponse(UserID=user.UserID, Login=user.Login, Nickname=user.Nickname)
+        return schemas.UserLoginResponse(UserID=user.UserID, Login=user.Login, Nickname=user.Nickname, RoomID=room.RoomID)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

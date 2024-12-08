@@ -1,3 +1,5 @@
+import base64
+
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional, List
@@ -6,6 +8,7 @@ class UserLoginResponse(BaseModel):
     UserID: int
     Login: str
     Nickname: str
+    RoomID: int
 
     class Config:
         from_attributes = True
@@ -34,8 +37,9 @@ class WorkCreate(BaseModel):
 
 class WorkSchema(BaseModel):
     WorkID: int
-    UserID: int
     WorkType: str
+    WorkTitle: str
+    WorkContent: str
     DateAdded: datetime
     LikesCount: int
     IsModerated: bool

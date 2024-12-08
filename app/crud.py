@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app import models, schemas
+import base64
 
 def get_users(db: Session, skip: int = 0, limit: int = 10):
     return db.query(models.User).order_by(models.User.UserID).offset(skip).limit(limit).all()
@@ -7,15 +8,21 @@ def get_users(db: Session, skip: int = 0, limit: int = 10):
 def get_user_by_id(db: Session, UserID: int):
     return db.query(models.User).filter(models.User.UserID == UserID).first()
 
+
 def get_works_by_user_id(db: Session, user_id: int, skip: int = 0, limit: int = 10):
-    return (
+    works = (
         db.query(models.Work)
         .filter(models.Work.UserID == user_id)
-        .order_by(models.Work.WorkID)
+        .order_by(models.Work.WorkID)  # Указываем сортировку
         .offset(skip)
         .limit(limit)
         .all()
     )
+    for work in works:
+        if work.WorkContent:
+            # Кодируем WorkContent в Base64
+            work.WorkContent = base64.b64encode(work.WorkContent).decode("utf-8")
+    return works
 
 
 def get_user_by_username(db: Session, Login: str):

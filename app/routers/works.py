@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile
 from sqlalchemy.orm import Session
 from typing import List
 from app import schemas, models, crud
@@ -21,15 +21,29 @@ def get_user_works(user_id: int, skip: int = 0, limit: int = 10, db: Session = D
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/{user_id}/add", response_model=schemas.WorkSchema)
-def add_user_work(user_id: int, work_data: schemas.WorkCreate, db: Session = Depends(get_db)):
-    try:
-        user = crud.get_user_by_id(db, UserID=user_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
 
-        new_work = crud.create_work(db, user_id=user_id, work_data=work_data)
-        return new_work
+@router.post("/{user_id}/add", response_model=dict)
+def add_work(
+    user_id: int,
+    work_type: str = Form(...),
+    work_title: str = Form(...),
+    file: UploadFile = Form(...),
+    db: Session = Depends(get_db)
+):
+    try:
+        file_content = file.file.read()
+
+        new_work = models.Work(
+            UserID=user_id,
+            WorkType=work_type,
+            WorkContent=file_content,
+            WorkTitle=work_title,
+        )
+        db.add(new_work)
+        db.commit()
+        db.refresh(new_work)
+
+        return {"message": "Work added successfully", "WorkID": new_work.WorkID}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
