@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app import models, schemas
+from datetime import datetime, timedelta
 import base64
 
 def get_users(db: Session, skip: int = 0, limit: int = 10):
@@ -13,15 +14,35 @@ def get_works_by_user_id(db: Session, user_id: int, skip: int = 0, limit: int = 
     works = (
         db.query(models.Work)
         .filter(models.Work.UserID == user_id)
-        .order_by(models.Work.WorkID)  # Указываем сортировку
+        .order_by(models.Work.WorkID)
         .offset(skip)
         .limit(limit)
         .all()
     )
+
+    return [schemas.AllWorkSchema.from_orm(work) for work in works]
+
+import base64
+
+def get_top_works(db: Session, days: int = 1, limit: int = 5):
+    from datetime import datetime, timedelta
+    recent_date = datetime.utcnow() - timedelta(days=days)
+
+    works = (
+        db.query(models.Work)
+        .filter(
+            models.Work.DateAdded >= recent_date,
+            models.Work.IsModerated == True
+        )
+        .order_by(models.Work.LikesCount.desc())
+        .limit(limit)
+        .all()
+    )
+
     for work in works:
         if work.WorkContent:
-            # Кодируем WorkContent в Base64
-            work.WorkContent = base64.b64encode(work.WorkContent).decode("utf-8")
+            work.WorkContent = base64.b64encode(work.WorkContent).decode('utf-8')
+
     return works
 
 

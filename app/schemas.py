@@ -46,6 +46,14 @@ class WorkSchema(BaseModel):
     class Config:
         from_attributes = True
 
+class AllWorkSchema(BaseModel):
+    WorkID: int
+    WorkType: str
+    WorkTitle: str
+    LikesCount: int
+    IsModerated: bool
+    class Config:
+        from_attributes = True
 
 class AvatarSchema(BaseModel):
     AvatarID: int
@@ -67,7 +75,7 @@ class UserSchema(BaseModel):
     UserID: int
     Login: str
     DateCreated: datetime
-    works: Optional[List[WorkSchema]] = []
+    works: Optional[List[WorkSchema]]
     avatar: Optional[AvatarSchema] = None
 
     class Config:
