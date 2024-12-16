@@ -38,7 +38,8 @@ def reg_users(user_data: schemas.UserRegistration, db: Session = Depends(get_db)
         return schemas.UserLoginResponse(
             UserID=new_user.UserID,
             Login=new_user.Login,
-            Nickname=new_user.Nickname
+            Nickname=new_user.Nickname,
+            RoomID=new_room.RoomID
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

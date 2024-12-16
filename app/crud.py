@@ -70,17 +70,17 @@ def save_avatar(db: Session, user_id: int, avatar_data: schemas.AvatarCreate):
     if not avatar:
         avatar = models.Avatar(
             UserID=user_id,
-            EyeColor=avatar_data.EyeColor,
             HairStyle=avatar_data.HairStyle,
-            SkinColor=avatar_data.SkinColor,
-            Outfit=avatar_data.Outfit,
+            Gender=avatar_data.Gender,
+            OutfitTop=avatar_data.OutfitTop,
+            OutfitDown=avatar_data.OutfitDown,
         )
         db.add(avatar)
     else:
-        avatar.EyeColor = avatar_data.EyeColor
         avatar.HairStyle = avatar_data.HairStyle
-        avatar.SkinColor = avatar_data.SkinColor
-        avatar.Outfit = avatar_data.Outfit
+        avatar.Gender = avatar_data.Gender
+        avatar.OutfitTop = avatar_data.OutfitTop
+        avatar.OutfitDown = avatar_data.OutfitDown
     db.commit()
     db.refresh(avatar)
     return avatar

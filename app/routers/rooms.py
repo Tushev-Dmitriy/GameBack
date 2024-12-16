@@ -1,8 +1,11 @@
+import base64
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from app import schemas, models, crud
 from app.database import get_db
+from datetime import datetime
 
 router = APIRouter()
 
@@ -71,21 +74,48 @@ def get_room_works(room_id: int, db: Session = Depends(get_db)):
         if not room:
             raise HTTPException(status_code=404, detail="Room not found")
 
+        # Список всех слотов
         slots = [
             room.Slot1WorkID, room.Slot2WorkID, room.Slot3WorkID, room.Slot4WorkID,
             room.Slot5WorkID, room.Slot6WorkID, room.Slot7WorkID, room.Slot8WorkID,
             room.Slot9WorkID, room.Slot10WorkID,
         ]
-        work_ids = [work_id for work_id in slots if work_id is not None]
 
-        works = db.query(models.Work).filter(models.Work.WorkID.in_(work_ids)).all()
+        # Получаем работы, соответствующие слотам
+        works = db.query(models.Work).filter(models.Work.WorkID.in_([slot for slot in slots if slot is not None])).all()
+        work_dict = {work.WorkID: work for work in works}
+
+        # Формируем ответ с учетом пустых слотов
+        result_works = []
+        for slot_id in slots:
+            if slot_id is None:
+                # Заглушка для пустого слота
+                result_works.append({
+                    "WorkID": -1,
+                    "WorkTitle": "Empty Slot",
+                    "WorkType": "None",
+                    "LikesCount": 0,
+                    "IsModerated": False,
+                    "WorkContent": "",  # Пустое содержимое для совместимости
+                    "DateAdded": datetime.utcnow(),  # Отсутствие даты
+                })
+            else:
+                work = work_dict.get(slot_id)
+                if work:
+                    # Преобразуем WorkContent в Base64 только если это байты
+                    if isinstance(work.WorkContent, bytes):
+                        work.WorkContent = base64.b64encode(work.WorkContent).decode("utf-8")
+                    else:
+                        work.WorkContent = ""
+                    result_works.append(work)
 
         return schemas.RoomWorksResponse(
             RoomID=room.RoomID,
-            Works=works
+            Works=result_works
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.delete("/{room_id}/{slot_number}/remove_work/", response_model=schemas.RoomSchema)
 def remove_work_from_slot(

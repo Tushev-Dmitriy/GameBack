@@ -65,13 +65,34 @@ def set_work_moderated(work_id: int, db: Session = Depends(get_db)):
 @router.delete("/{user_id}/{work_id}/delete")
 def delete_work(user_id: int, work_id: int, db: Session = Depends(get_db)):
     try:
+        # Проверяем, существует ли работа
         work = db.query(models.Work).filter(models.Work.WorkID == work_id).first()
         if not work:
             raise HTTPException(status_code=404, detail="Work not found")
 
+        # Проверяем, принадлежит ли работа пользователю
         if work.UserID != user_id:
             raise HTTPException(status_code=403, detail="You do not have permission to delete this work")
 
+        # Ищем комнату, связанную с пользователем
+        room = db.query(models.Room).filter(models.Room.UserID == user_id).first()
+        if not room:
+            raise HTTPException(status_code=404, detail="Room not found for the user")
+
+        # Проверяем слоты комнаты и обнуляем соответствующий слот
+        slot_found = False
+        for i in range(1, 11):  # Слоты от 1 до 10
+            slot_field = f"Slot{i}WorkID"
+            if getattr(room, slot_field) == work_id:
+                setattr(room, slot_field, None)  # Устанавливаем NULL для соответствующего слота
+                slot_found = True
+                break
+
+        # Сохраняем изменения в комнате, если работа найдена в слотах
+        if slot_found:
+            db.commit()
+
+        # Удаляем работу из таблицы Works
         db.delete(work)
         db.commit()
 

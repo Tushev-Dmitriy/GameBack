@@ -57,19 +57,19 @@ class AllWorkSchema(BaseModel):
 
 class AvatarSchema(BaseModel):
     AvatarID: int
-    EyeColor: int
     HairStyle: int
-    SkinColor: int
-    Outfit: int
+    Gender: int
+    OutfitTop: int
+    OutfitDown: int
 
     class Config:
         from_attributes = True
 
 class AvatarCreate(BaseModel):
-    EyeColor: int
     HairStyle: int
-    SkinColor: int
-    Outfit: int
+    Gender: int
+    OutfitTop: int
+    OutfitDown: int
 
 class UserSchema(BaseModel):
     UserID: int
@@ -100,6 +100,9 @@ class RoomSchema(BaseModel):
 class RoomWorksResponse(BaseModel):
     RoomID: int
     Works: List[WorkSchema]
+
+    class Config:
+        from_attributes = True
 
 class AddWorkRequest(BaseModel):
     work_id: int

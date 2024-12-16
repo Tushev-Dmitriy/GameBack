@@ -46,7 +46,7 @@ class Work(Base):
     WorkContent = Column(LargeBinary, nullable=False)
     DateAdded = Column(DateTime, default=datetime.utcnow)
     LikesCount = Column(Integer, default=0)
-    IsModerated = Column(Boolean, default=False)
+    IsModerated = Column(Boolean, default=True)
 
     user = relationship("User", back_populates="works")
     rooms = relationship(
@@ -72,10 +72,10 @@ class Avatar(Base):
 
     AvatarID = Column(Integer, primary_key=True)
     UserID = Column(Integer, ForeignKey("Users.UserID"))
-    EyeColor = Column(Integer)
     HairStyle = Column(Integer)
-    SkinColor = Column(Integer)
-    Outfit = Column(Integer)
+    Gender = Column(Integer)
+    OutfitTop = Column(Integer)
+    OutfitDown = Column(Integer)
 
     user = relationship("User", back_populates="avatar")
 
