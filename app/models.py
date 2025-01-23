@@ -21,7 +21,6 @@ Base = declarative_base()
 
 class User(Base):
     __tablename__ = "Users"
-    __table_args__ = {"autoload_with": engine}
 
     UserID = Column(Integer, primary_key=True)
     Login = Column(String(50))
@@ -37,7 +36,6 @@ class User(Base):
 
 class Work(Base):
     __tablename__ = "Works"
-    __table_args__ = {"autoload_with": engine}
 
     WorkID = Column(Integer, primary_key=True, index=True)
     UserID = Column(Integer, ForeignKey("Users.UserID"), nullable=False)
@@ -68,7 +66,6 @@ class Work(Base):
 
 class Avatar(Base):
     __tablename__ = "Avatars"
-    __table_args__ = {"autoload_with": engine}
 
     AvatarID = Column(Integer, primary_key=True)
     UserID = Column(Integer, ForeignKey("Users.UserID"))
@@ -82,7 +79,6 @@ class Avatar(Base):
 
 class Room(Base):
     __tablename__ = "Rooms"
-    __table_args__ = {"autoload_with": engine}
 
     RoomID = Column(Integer, primary_key=True)
     UserID = Column(Integer, ForeignKey("Users.UserID"))
