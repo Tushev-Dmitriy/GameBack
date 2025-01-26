@@ -74,35 +74,30 @@ def get_room_works(room_id: int, db: Session = Depends(get_db)):
         if not room:
             raise HTTPException(status_code=404, detail="Room not found")
 
-        # Список всех слотов
         slots = [
             room.Slot1WorkID, room.Slot2WorkID, room.Slot3WorkID, room.Slot4WorkID,
             room.Slot5WorkID, room.Slot6WorkID, room.Slot7WorkID, room.Slot8WorkID,
             room.Slot9WorkID, room.Slot10WorkID,
         ]
 
-        # Получаем работы, соответствующие слотам
         works = db.query(models.Work).filter(models.Work.WorkID.in_([slot for slot in slots if slot is not None])).all()
         work_dict = {work.WorkID: work for work in works}
 
-        # Формируем ответ с учетом пустых слотов
         result_works = []
         for slot_id in slots:
             if slot_id is None:
-                # Заглушка для пустого слота
                 result_works.append({
                     "WorkID": -1,
                     "WorkTitle": "Empty Slot",
                     "WorkType": "None",
                     "LikesCount": 0,
                     "IsModerated": False,
-                    "WorkContent": "",  # Пустое содержимое для совместимости
-                    "DateAdded": datetime.utcnow(),  # Отсутствие даты
+                    "WorkContent": "",
+                    "DateAdded": datetime.utcnow(),
                 })
             else:
                 work = work_dict.get(slot_id)
                 if work:
-                    # Преобразуем WorkContent в Base64 только если это байты
                     if isinstance(work.WorkContent, bytes):
                         work.WorkContent = base64.b64encode(work.WorkContent).decode("utf-8")
                     else:
@@ -113,6 +108,25 @@ def get_room_works(room_id: int, db: Session = Depends(get_db)):
             RoomID=room.RoomID,
             Works=result_works
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{room_id}/work_ids/", response_model=List[int])
+def get_work_ids_in_room(room_id: int, db: Session = Depends(get_db)):
+    try:
+        room = db.query(models.Room).filter(models.Room.RoomID == room_id).first()
+        if not room:
+            raise HTTPException(status_code=404, detail="Room not found")
+
+        work_ids = [
+            room.Slot1WorkID, room.Slot2WorkID, room.Slot3WorkID, room.Slot4WorkID,
+            room.Slot5WorkID, room.Slot6WorkID, room.Slot7WorkID, room.Slot8WorkID,
+            room.Slot9WorkID, room.Slot10WorkID,
+        ]
+
+        work_ids = [work_id for work_id in work_ids if work_id is not None]
+
+        return work_ids
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
