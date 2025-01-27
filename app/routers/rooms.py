@@ -132,8 +132,7 @@ def get_work_ids_in_room(room_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/{room_id}/add_works/", response_model=schemas.RoomSchema)
-def add_works_to_room(room_id: int, works_data: schemas.RoomWorksRequest, db: Session = Depends(get_db)
-):
+def add_works_to_room(room_id: int, works_data: schemas.RoomWorksRequest, db: Session = Depends(get_db)):
     try:
         room = db.query(models.Room).filter(models.Room.RoomID == room_id).first()
         if not room:
@@ -142,13 +141,11 @@ def add_works_to_room(room_id: int, works_data: schemas.RoomWorksRequest, db: Se
         if len(works_data.works) != 10:
             raise HTTPException(status_code=400, detail="The request must contain exactly 10 slot values")
 
-        for slot_number, work_id in enumerate(works_data, start=1):
-
+        for slot_number, work_id in enumerate(works_data.works, start=1):
             if work_id == -1:
                 slot_field = f"Slot{slot_number}WorkID"
                 setattr(room, slot_field, None)
             else:
-
                 work = db.query(models.Work).filter(models.Work.WorkID == work_id).first()
                 if not work:
                     raise HTTPException(status_code=404, detail=f"Work with ID {work_id} not found")
@@ -183,11 +180,11 @@ def add_works_to_room(room_id: int, works_data: schemas.RoomWorksRequest, db: Se
             Slot9WorkID=room.Slot9WorkID,
             Slot10WorkID=room.Slot10WorkID,
         )
-
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 
