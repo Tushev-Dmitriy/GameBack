@@ -105,5 +105,14 @@ class RoomWorksResponse(BaseModel):
         from_attributes = True
 
 class AddWorkRequest(BaseModel):
-    work_id: int
-    user_id: int
+    RoomID: int
+    Slot1WorkID: int
+    Slot2WorkID: int
+    Slot3WorkID: int
+    Slot4WorkID: int
+    Slot5WorkID: int
+    Slot6WorkID: int
+    Slot7WorkID: int
+    Slot8WorkID: int
+    Slot9WorkID: int
+    Slot10WorkID: int

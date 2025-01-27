@@ -131,6 +131,73 @@ def get_work_ids_in_room(room_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.put("/{room_id}/add_works/", response_model=schemas.RoomSchema)
+def add_works_to_room(
+    room_id: int,
+    works_data: List[int],  # Список идентификаторов работ или -1 для пустого слота
+    db: Session = Depends(get_db)
+):
+    try:
+        room = db.query(models.Room).filter(models.Room.RoomID == room_id).first()
+        if not room:
+            raise HTTPException(status_code=404, detail="Room not found")
+
+        if len(works_data) != 9:
+            raise HTTPException(status_code=400, detail="The request must contain exactly 10 slot values")
+
+        # Перебираем переданные данные и проверяем каждый слот
+        for slot_number, work_id in enumerate(works_data, start=1):
+            # Если значение -1, делаем слот пустым
+            if work_id == -1:
+                slot_field = f"Slot{slot_number}WorkID"
+                setattr(room, slot_field, None)
+            else:
+                # Проверяем, что работа существует
+                work = db.query(models.Work).filter(models.Work.WorkID == work_id).first()
+                if not work:
+                    raise HTTPException(status_code=404, detail=f"Work with ID {work_id} not found")
+
+                # Проверяем, что работа модерирована
+                if not work.IsModerated:
+                    raise HTTPException(status_code=400, detail=f"Work with ID {work_id} is not moderated")
+
+                # Проверяем тип работы в зависимости от слота
+                if work.WorkType.lower() == "image" and not (1 <= slot_number <= 3):
+                    raise HTTPException(status_code=400, detail="Image work must be placed in slot 1-3")
+                elif work.WorkType.lower() == "music" and not (4 <= slot_number <= 6):
+                    raise HTTPException(status_code=400, detail="Music work must be placed in slot 4-6")
+                elif work.WorkType.lower() == "model" and not (7 <= slot_number <= 9):
+                    raise HTTPException(status_code=400, detail="Model work must be placed in slot 7-9")
+
+                # Если все проверки пройдены, то записываем работу в слот
+                slot_field = f"Slot{slot_number}WorkID"
+                setattr(room, slot_field, work_id)
+
+        room.NeedModeration = False  # Обновляем флаг, если нужно
+        db.commit()
+        db.refresh(room)
+
+        return schemas.RoomSchema(
+            RoomID=room.RoomID,
+            Slot1WorkID=room.Slot1WorkID,
+            Slot2WorkID=room.Slot2WorkID,
+            Slot3WorkID=room.Slot3WorkID,
+            Slot4WorkID=room.Slot4WorkID,
+            Slot5WorkID=room.Slot5WorkID,
+            Slot6WorkID=room.Slot6WorkID,
+            Slot7WorkID=room.Slot7WorkID,
+            Slot8WorkID=room.Slot8WorkID,
+            Slot9WorkID=room.Slot9WorkID,
+            Slot10WorkID=room.Slot10WorkID,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
 @router.delete("/{room_id}/{slot_number}/remove_work/", response_model=schemas.RoomSchema)
 def remove_work_from_slot(
     room_id: int,
