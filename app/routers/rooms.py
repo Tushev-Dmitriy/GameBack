@@ -124,7 +124,7 @@ def get_work_ids_in_room(room_id: int, db: Session = Depends(get_db)):
             room.Slot9WorkID, room.Slot10WorkID,
         ]
 
-        work_ids = [work_id for work_id in work_ids if work_id is not None]
+        work_ids = [work_id if work_id is not None else 1 for work_id in work_ids]
 
         return work_ids
     except Exception as e:
