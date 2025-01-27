@@ -116,3 +116,6 @@ class AddWorkRequest(BaseModel):
     Slot8WorkID: int
     Slot9WorkID: int
     Slot10WorkID: int
+
+class RoomWorksRequest(BaseModel):
+    works: List[int]
